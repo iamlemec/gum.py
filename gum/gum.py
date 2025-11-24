@@ -1,6 +1,6 @@
 # terminal tools
 
-import requests
+import json
 import subprocess
 
 ##
@@ -22,37 +22,56 @@ def chafa(data, **kwargs):
 ## server interface
 ##
 
-class GumServer:
-    def __init__(self, host='localhost', port=3602, path='../gum.js/src/server.js'):
-        args = [ 'node', path, '--host', host, '--port', str(port) ]
-        self.server = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-        self.url = f'http://{host}:{port}'
+class GumUnixPipe:
+    def __init__(self, path='../gum.js/src/pipe.js'):
+        self.proc = subprocess.Popen(
+            [ 'node', path ],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            text=True,
+            bufsize=1
+        )
 
-    def evaluate(self, code, pixels=None):
-        args = '?size={pixels}' if pixels is not None else ''
-        url = f'{self.url}/evaluate{args}'
-        headers = { 'Content-Type': 'text/plain' }
-        response = requests.post(url, data=code, headers=headers)
-        return response.text
+    def __del__(self):
+        self.close()
 
-    def render(self, code, pixels=None):
-        args = '?size={pixels}' if pixels is not None else ''
-        url = f'{self.url}/render{args}'
-        headers = { 'Content-Type': 'text/plain' }
-        response = requests.post(url, data=code, headers=headers)
-        return response.content
+    def post(self, **request):
+        # send request
+        self.proc.stdin.write(json.dumps(request) + '\n')
+        self.proc.stdin.flush()
+
+        # read response
+        response = json.loads(self.proc.stdout.readline())
+        ok, result = response['ok'], response['result']
+
+        # check for errors
+        if not ok:
+            raise ValueError(result)
+
+        # return response
+        return result
+
+    def close(self):
+        self.proc.stdin.close()
+        self.proc.wait()
+
+    def evaluate(self, code, pixels=None, **kwargs):
+        return self.post(task='evaluate', code=code, size=pixels, **kwargs)
+
+    def render(self, code, pixels=None, **kwargs):
+        return self.post(task='render', code=code, size=pixels, **kwargs)
 
 ##
 ## server instance
 ##
 
 # singleton server instance
-server = GumServer()
+server = GumUnixPipe()
 
 def restart():
     global server
     del server
-    server = GumServer()
+    server = GumUnixPipe()
 
 def evaluate(code, **kwargs):
     return server.evaluate(code, **kwargs)
