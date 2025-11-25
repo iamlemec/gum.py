@@ -41,14 +41,14 @@ def test_data():
     df['cos'] = np.cos(df['theta'])
     return df.set_index('theta')
 
-def plot(data, size=75, theme='dark', pixels=None, format=None, show=True, **kwargs0):
+def plot(frame, size=75, theme='dark', pixels=None, format=None, show=True, **kwargs0):
     # collect arguments
     kwargs = { **DEFAULT, **THEMES[theme], **kwargs0 }
     (line_args, box_args), plot_args = prefix_split(('line', 'box'), kwargs)
 
-    # data setters
-    index = Variable(data.index.name or 'index', data.index.tolist())
-    value = [ Variable(col, data[col].tolist()) for col in data.columns ]
+    # value setters
+    index = Variable(frame.index.name or 'index', frame.index.tolist())
+    value = [ Variable(col, frame[col].tolist()) for col in frame.columns ]
     header = '\n'.join([ index.define(), *[ v.define() for v in value ] ])
 
     # data plotters
@@ -59,7 +59,7 @@ def plot(data, size=75, theme='dark', pixels=None, format=None, show=True, **kwa
     # generate svg code
     code = f'{header}\n\nreturn {box}'
 
-    # render to svg
+    # render svg
     if show:
         display(code, size=size, pixels=pixels, format=format)
     else:

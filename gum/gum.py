@@ -1,6 +1,7 @@
 # terminal tools
 
 import json
+import base64
 import subprocess
 
 ##
@@ -22,20 +23,29 @@ def chafa(data, **kwargs):
 ## server interface
 ##
 
+GUM_PATH = '../gum.js/src/pipe.js'
+
 class GumUnixPipe:
-    def __init__(self, path='../gum.js/src/pipe.js'):
+    def __init__(self):
+        self.proc = None
+
+    def __del__(self):
+        self.close()
+
+    def init(self):
         self.proc = subprocess.Popen(
-            [ 'node', path ],
+            [ 'node', GUM_PATH ],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             text=True,
             bufsize=1
         )
 
-    def __del__(self):
-        self.close()
-
     def post(self, **request):
+        # ensure server
+        if self.proc is None:
+            self.init()
+
         # send request
         self.proc.stdin.write(json.dumps(request) + '\n')
         self.proc.stdin.flush()
@@ -52,14 +62,17 @@ class GumUnixPipe:
         return result
 
     def close(self):
-        self.proc.stdin.close()
-        self.proc.wait()
+        if self.proc is not None:
+            self.proc.stdin.close()
+            self.proc.wait()
+            self.proc = None
 
     def evaluate(self, code, pixels=None, **kwargs):
         return self.post(task='evaluate', code=code, size=pixels, **kwargs)
 
     def render(self, code, pixels=None, **kwargs):
-        return self.post(task='render', code=code, size=pixels, **kwargs)
+        data = self.post(task='render', code=code, size=pixels, **kwargs)
+        return base64.b64decode(data)
 
 ##
 ## server instance
@@ -68,23 +81,18 @@ class GumUnixPipe:
 # singleton server instance
 server = GumUnixPipe()
 
-def restart():
-    global server
-    del server
-    server = GumUnixPipe()
-
 def evaluate(code, **kwargs):
     return server.evaluate(code, **kwargs)
 
 def render(code, **kwargs):
     return server.render(code, **kwargs)
 
-def display(code, size=None, format=None, **kwargs):
+def display(code, size=75, format=None, **kwargs):
     # evaluate or render
     if format is None or format == 'svg':
-        data = evaluate(code, **kwargs).encode()
+        data = evaluate(str(code), **kwargs).encode()
     elif format == 'png':
-        data = render(code, **kwargs)
+        data = render(str(code), **kwargs)
     else:
         raise ValueError(f'Invalid format: {format}')
 

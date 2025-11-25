@@ -113,11 +113,27 @@ class Frame(Group):
     def __init__(self, children, **args):
         super().__init__(children, tag='Frame', **args)
 
+class Stack(Group):
+    def __init__(self, children, **args):
+        super().__init__(children, tag='Stack', **args)
+
+class HStack(Group):
+    def __init__(self, children, **args):
+        super().__init__(children, tag='HStack', **args)
+
+class VStack(Group):
+    def __init__(self, children, **args):
+        super().__init__(children, tag='VStack', **args)
+
 ## plot elements
 
 class DataPath(Element):
     def __init__(self, **kwargs):
         super().__init__('DataPath', True, **kwargs)
+
+class DataPoints(Group):
+    def __init__(self, children, **kwargs):
+        super().__init__(children, tag='DataPoints', **kwargs)
 
 class Plot(Group):
     def __init__(self, children, **args):
