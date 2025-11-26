@@ -17,7 +17,7 @@ DEFAULT = {
 
 THEMES = {
     'dark': {
-        'grid_stroke': C.white,
+        'grid_stroke': '#555',
         'axis_stroke': C.white,
         'axis_label_color': C.white,
     },
@@ -41,7 +41,7 @@ def test_data():
     df['cos'] = np.cos(df['theta'])
     return df.set_index('theta')
 
-def plot(frame, size=75, theme='dark', pixels=None, format=None, show=True, **kwargs0):
+def plot(frame, size=75, theme='dark', pixels=None, format=None, method=None, show=True, **kwargs0):
     # collect arguments
     kwargs = { **DEFAULT, **THEMES[theme], **kwargs0 }
     (line_args, box_args), plot_args = prefix_split(('line', 'box'), kwargs)
@@ -61,6 +61,6 @@ def plot(frame, size=75, theme='dark', pixels=None, format=None, show=True, **kw
 
     # render svg
     if show:
-        display(code, size=size, pixels=pixels, format=format)
+        display(code, size=size, pixels=pixels, format=format, method=method)
     else:
         return code

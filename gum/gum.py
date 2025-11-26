@@ -1,5 +1,6 @@
 # terminal tools
 
+import sys
 import json
 import base64
 import subprocess
@@ -7,6 +8,10 @@ import subprocess
 ##
 ## chafa interface
 ##
+
+def readtext(path):
+    with open(path, 'r') as fid:
+        return fid.read()
 
 def readbin(path):
     with open(path, 'rb') as fid:
@@ -27,7 +32,7 @@ GUM_PATH = '../gum.js/src/pipe.js'
 
 class GumUnixPipe:
     def __init__(self):
-        self.proc = None
+        self.init()
 
     def __del__(self):
         self.close()
@@ -37,8 +42,9 @@ class GumUnixPipe:
             [ 'node', GUM_PATH ],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
+            stderr=sys.stdout.fileno(),
             text=True,
-            bufsize=1
+            bufsize=1,
         )
 
     def post(self, **request):
@@ -87,7 +93,7 @@ def evaluate(code, **kwargs):
 def render(code, **kwargs):
     return server.render(code, **kwargs)
 
-def display(code, size=75, format=None, **kwargs):
+def display(code, size=75, format=None, method=None, **kwargs):
     # evaluate or render
     if format is None or format == 'svg':
         data = evaluate(str(code), **kwargs).encode()
@@ -97,9 +103,8 @@ def display(code, size=75, format=None, **kwargs):
         raise ValueError(f'Invalid format: {format}')
 
     # display on terminal
-    chafa(data, size=size)
+    chafa(data, size=size, format=method)
 
 def display_file(path, **kwargs):
-    with open(path, 'r') as fid:
-        code = fid.read()
+    code = readtext(path)
     display(code, **kwargs)
