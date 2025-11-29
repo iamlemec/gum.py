@@ -8,24 +8,10 @@ from .gum import display
 ##
 
 DEFAULT = {
-    'grid': True,
     'aspect': 2,
     'margin': (0.2, 0.15),
     'line_stroke': C.blue,
     'line_stroke_width': 2,
-}
-
-THEMES = {
-    'dark': {
-        'grid_stroke': '#555',
-        'axis_stroke': C.white,
-        'axis_label_color': C.white,
-    },
-    'light': {
-        'box_fill': C.white,
-        'box_rounded': 0.025,
-        'box_margin': 0.05,
-    },
 }
 
 ##
@@ -41,9 +27,9 @@ def test_data():
     df['cos'] = np.cos(df['theta'])
     return df.set_index('theta')
 
-def plot(frame, size=75, theme='dark', pixels=None, format=None, method=None, show=True, **kwargs0):
+def plot(frame, size=75, pixels=None, format=None, method=None, show=True, **kwargs0):
     # collect arguments
-    kwargs = { **DEFAULT, **THEMES[theme], **kwargs0 }
+    kwargs = { **DEFAULT, **kwargs0 }
     (line_args, box_args), plot_args = prefix_split(('line', 'box'), kwargs)
 
     # value setters

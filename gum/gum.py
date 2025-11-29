@@ -93,12 +93,12 @@ def evaluate(code, **kwargs):
 def render(code, **kwargs):
     return server.render(code, **kwargs)
 
-def display(code, size=75, format=None, method=None, **kwargs):
+def display(code, size=75, theme='dark', format=None, method=None, **kwargs):
     # evaluate or render
     if format is None or format == 'svg':
-        data = evaluate(str(code), **kwargs).encode()
+        data = evaluate(str(code), theme=theme, **kwargs).encode()
     elif format == 'png':
-        data = render(str(code), **kwargs)
+        data = render(str(code), theme=theme, **kwargs)
     else:
         raise ValueError(f'Invalid format: {format}')
 
