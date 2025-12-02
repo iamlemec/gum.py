@@ -3,6 +3,7 @@
 import sys
 import json
 import base64
+import threading
 import subprocess
 
 ##
@@ -32,6 +33,8 @@ GUM_PATH = '../gum.js/src/pipe.js'
 
 class GumUnixPipe:
     def __init__(self):
+        self.proc = None
+        self._pump_thread = None
         self.init()
 
     def __del__(self):
@@ -42,10 +45,20 @@ class GumUnixPipe:
             [ 'node', GUM_PATH ],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
-            stderr=sys.stdout.fileno(),
+            stderr=subprocess.PIPE,
             text=True,
             bufsize=1,
         )
+
+        # pump stderr to stdout
+        self._start_pump_loop()
+
+    def _start_pump_loop(self):
+        def pump_loop():
+            for line in self.proc.stderr:
+                print(f'[gum server] {line}')
+        self._pump_thread = threading.Thread(target=pump_loop, daemon=True)
+        self._pump_thread.start()
 
     def post(self, **request):
         # ensure server
@@ -56,13 +69,18 @@ class GumUnixPipe:
         self.proc.stdin.write(json.dumps(request) + '\n')
         self.proc.stdin.flush()
 
+        # get reply
+        reply = self.proc.stdout.readline()
+        if reply == '':
+            raise ValueError('[gum server] connection closed')
+
         # read response
-        response = json.loads(self.proc.stdout.readline())
+        response = json.loads(reply)
         ok, result = response['ok'], response['result']
 
         # check for errors
         if not ok:
-            raise ValueError(result)
+            raise ValueError(f'[gum server] {result}')
 
         # return response
         return result
@@ -70,8 +88,13 @@ class GumUnixPipe:
     def close(self):
         if self.proc is not None:
             self.proc.stdin.close()
-            self.proc.wait()
+            self.proc.wait(timeout=1)
             self.proc = None
+        self._pump_thread = None
+
+    def restart(self):
+        self.close()
+        self.init()
 
     def evaluate(self, code, pixels=None, **kwargs):
         return self.post(task='evaluate', code=code, size=pixels, **kwargs)
@@ -86,6 +109,9 @@ class GumUnixPipe:
 
 # singleton server instance
 server = GumUnixPipe()
+
+def restart():
+    server.restart()
 
 def evaluate(code, **kwargs):
     return server.evaluate(code, **kwargs)
