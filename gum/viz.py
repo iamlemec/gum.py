@@ -1,6 +1,10 @@
 # gum visualization
 
-from .gen import C, prefix_split, Variable, Box, DataPath, Plot
+from itertools import cycle
+import numpy as np
+import pandas as pd
+
+from .gen import C, prefix_split, Var, Vars, Gum, Box, DataPath, Plot
 from .gum import display
 
 ##
@@ -10,43 +14,60 @@ from .gum import display
 DEFAULT = {
     'aspect': 2,
     'margin': (0.2, 0.15),
-    'line_stroke': C.blue,
     'line_stroke_width': 2,
 }
+
+COLORS = [
+    C.blue,
+    C.green,
+    C.red,
+    C.yellow,
+    C.purple,
+    C.orange,
+]
 
 ##
 ## plotting interface
 ##
 
-def test_data():
-    import math
-    import numpy as np
-    import pandas as pd
-    df = pd.DataFrame({ 'theta': np.linspace(0, 2 * math.pi, 100) })
+def test_trig():
+    df = pd.DataFrame({ 'theta': np.linspace(0, 2 * np.pi, 100) })
     df['sin'] = np.sin(df['theta'])
     df['cos'] = np.cos(df['theta'])
     return df.set_index('theta')
 
-def plot(frame, size=75, pixels=None, format=None, method=None, show=True, **kwargs0):
+def test_brown(N=3, T=100):
+    return pd.DataFrame({
+        f'stock_{i}': np.random.randn(T).cumsum() / np.sqrt(T) for i in range(N)
+    })
+
+def plot(frame, size=None, pixels=None, format=None, method=None, show=True, **kwargs0):
     # collect arguments
     kwargs = { **DEFAULT, **kwargs0 }
-    (line_args, box_args), plot_args = prefix_split(('line', 'box'), kwargs)
+    line_args, plot_args = prefix_split('line', kwargs)
+
+    # convert to dataframe
+    if isinstance(frame, (np.ndarray, list, tuple)):
+        frame = pd.Series(frame, name='value')
+    if isinstance(frame, pd.Series):
+        frame = frame.to_frame()
 
     # value setters
-    index = Variable(frame.index.name or 'index', frame.index.tolist())
-    value = [ Variable(col, frame[col].tolist()) for col in frame.columns ]
-    header = '\n'.join([ index.define(), *[ v.define() for v in value ] ])
+    index = Var.from_series(frame.index, name='index')
+    vars = Vars.from_dataframe(frame)
 
     # data plotters
-    lines = [ DataPath(xvals=index, yvals=v, **line_args) for v in value ]
-    plot = Plot(lines, **plot_args)
-    box = Box(plot, **box_args)
+    lines = [
+        DataPath(xvals=index, yvals=vars[v], **{'stroke': c, **line_args})
+        for v, c in zip(vars, cycle(COLORS))
+    ]
 
     # generate svg code
-    code = f'{header}\n\nreturn {box}'
+    plot = Plot(lines, **plot_args)
+    code = Gum(plot, vars=[index, vars])
 
     # render svg
     if show:
         display(code, size=size, pixels=pixels, format=format, method=method)
     else:
-        return code
+        return plot, [index, vars]

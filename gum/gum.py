@@ -119,7 +119,7 @@ def evaluate(code, **kwargs):
 def render(code, **kwargs):
     return server.render(code, **kwargs)
 
-def display(code, size=75, theme='dark', format=None, method=None, **kwargs):
+def display(code, size=None, theme='dark', format=None, method=None, **kwargs):
     # evaluate or render
     if format is None or format == 'svg':
         data = evaluate(str(code), theme=theme, **kwargs).encode()
@@ -129,7 +129,7 @@ def display(code, size=75, theme='dark', format=None, method=None, **kwargs):
         raise ValueError(f'Invalid format: {format}')
 
     # display on terminal
-    chafa(data, size=size, format=method)
+    chafa(data, size=size or 75, format=method)
 
 def display_file(path, **kwargs):
     code = readtext(path)
