@@ -14,31 +14,49 @@ from .utl import AlgMixin
 def stringify(value):
     # convert functions to Functions
     if callable(value):
-        return Fun(value)
+        value = Fun(value)
 
-    # short circuit for defined values
-    if isinstance(value, (Var, Con, Fun)):
-        return str(value)
-
-    # convert numeric values to lists (pd.Series, np.ndarray)
+    # convert numeric values to lists
     if hasattr(value, 'tolist'):
         value = value.tolist()
 
-    # convert to json
-    return json.dumps(value)
+    # short circuit for gum values
+    if isinstance(value, (Var, Con, Fun, Element)):
+        return str(value)
 
-def convert(value):
-    if callable(value):
-        return f'{{ {Fun(value)} }}'
-    return str(value)
+    # handle basic json types
+    if value is None:
+        return 'null'
+    elif isinstance(value, bool):
+        return 'true' if value else 'false'
+    elif isinstance(value, int):
+        return str(value)
+    elif isinstance(value, float):
+        return f'{value:g}'
+    elif isinstance(value, str):
+        return json.dumps(value) # handles escaping
+    elif isinstance(value, (list, tuple)):
+        return f'[{", ".join([ stringify(v) for v in value ])}]'
+    elif isinstance(value, dict):
+        return f'{{ {", ".join([ f'"{k}": {stringify(v)}' for k, v in value.items() ])} }}'
+    else:
+        raise ValueError(f'Unsupported type: {type(value)}')
+
+def convert_child(value):
+    enc = stringify(value)
+    if isinstance(value, Element):
+        return enc
+    else:
+        return f'{{ {enc} }}'
 
 def convert_args(opts):
     return ' '.join([
         f'{k}={{{stringify(v)}}}' for k, v in opts.items()
     ])
 
-def indented(lines, n=2):
+def indented(text, n=2):
     tab = n * ' '
+    lines = text.split('\n')
     return '\n'.join([ f'{tab}{line}' for line in lines ])
 
 def ensure_list(value):
@@ -77,19 +95,12 @@ def prefix_split(pres, attr):
     return attr1, attr0
 
 ##
-## gum constants
-##
-
-r2d = math.pi / 180
-d2r = 180 / math.pi
-
-##
 ## gum constructors
 ##
 
 ## values
 
-class Var:
+class Var(AlgMixin):
     def __init__(self, name, value):
         self.name = name
         self.value = value
@@ -191,7 +202,7 @@ class Group(Element):
         self.children = children
 
     def inner(self):
-        return '\n'.join([ convert(c) for c in self.children ])
+        return '\n'.join([ indented(convert_child(c)) for c in self.children ])
 
 ## function elements
 
