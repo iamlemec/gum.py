@@ -13,6 +13,7 @@ from .gum import display
 
 DEFAULT = {
     'aspect': 2,
+    'grid': True,
     'margin': (0.2, 0.15),
     'line_stroke_width': 2,
 }

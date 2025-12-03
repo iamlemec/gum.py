@@ -1,7 +1,6 @@
 # gum generation
 
 import json
-import math
 import inspect
 from collections import defaultdict
 
@@ -195,8 +194,7 @@ class Element:
             return f'<{self.tag} {args}>\n{inner}\n</{self.tag}>'
 
 class Group(Element):
-    def __init__(self, children=None, tag='Group', **args):
-        children = ensure_list(children)
+    def __init__(self, *children, tag='Group', **args):
         unary = len(children) == 0
         super().__init__(tag, unary, **args)
         self.children = children
@@ -219,24 +217,24 @@ class Fun:
 ## layout elements
 
 class Box(Group):
-    def __init__(self, children=None, **args):
-        super().__init__(children, tag='Box', **args)
+    def __init__(self, *children, **args):
+        super().__init__(*children, tag='Box', **args)
 
 class Frame(Group):
-    def __init__(self, children=None, **args):
-        super().__init__(children, tag='Frame', **args)
+    def __init__(self, *children, **args):
+        super().__init__(*children, tag='Frame', **args)
 
 class Stack(Group):
-    def __init__(self, children=None, **args):
-        super().__init__(children, tag='Stack', **args)
+    def __init__(self, *children, **args):
+        super().__init__(*children, tag='Stack', **args)
 
 class HStack(Group):
-    def __init__(self, children=None, **args):
-        super().__init__(children, tag='HStack', **args)
+    def __init__(self, *children, **args):
+        super().__init__(*children, tag='HStack', **args)
 
 class VStack(Group):
-    def __init__(self, children=None, **args):
-        super().__init__(children, tag='VStack', **args)
+    def __init__(self, *children, **args):
+        super().__init__(*children, tag='VStack', **args)
 
 ## shape elements
 
@@ -256,36 +254,50 @@ class Circle(Element):
     def __init__(self, **kwargs):
         super().__init__('Circle', True, **kwargs)
 
+## draw elements
+
+class Line(Element):
+    def __init__(self, **kwargs):
+        super().__init__('Line', True, **kwargs)
+
+class HLine(Element):
+    def __init__(self, **kwargs):
+        super().__init__('HLine', True, **kwargs)
+
+class VLine(Element):
+    def __init__(self, **kwargs):
+        super().__init__('VLine', True, **kwargs)
+
 ## text elements
 
 class Text(Group):
-    def __init__(self, children=None, **kwargs):
-        super().__init__(children, tag='Text', **kwargs)
+    def __init__(self, *children, **kwargs):
+        super().__init__(*children, tag='Text', **kwargs)
 
 ## plot elements
 
 class DataPath(Element):
-    def __init__(self, children=None, **kwargs):
+    def __init__(self, *children, **kwargs):
         super().__init__('DataPath', True, **kwargs)
 
 class DataPoints(Group):
-    def __init__(self, children=None, **kwargs):
-        super().__init__(children, tag='DataPoints', **kwargs)
+    def __init__(self, *children, **kwargs):
+        super().__init__(*children, tag='DataPoints', **kwargs)
 
 class Graph(Group):
-    def __init__(self, children=None, **kwargs):
-        super().__init__(children, tag='Graph', **kwargs)
+    def __init__(self, *children, **kwargs):
+        super().__init__(*children, tag='Graph', **kwargs)
 
 class Plot(Group):
-    def __init__(self, children=None, **args):
-        super().__init__(children, tag='Plot', **args)
+    def __init__(self, *children, **args):
+        super().__init__(*children, tag='Plot', **args)
 
 ## container elements
 
 class TitleFrame(Group):
-    def __init__(self, children=None, **args):
-        super().__init__(children, tag='TitleFrame', **args)
+    def __init__(self, *children, **args):
+        super().__init__(*children, tag='TitleFrame', **args)
 
 class Slide(Group):
-    def __init__(self, children=None, **args):
-        super().__init__(children, tag='Slide', **args)
+    def __init__(self, *children, **args):
+        super().__init__(*children, tag='Slide', **args)
