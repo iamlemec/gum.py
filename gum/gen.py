@@ -1,23 +1,36 @@
 # gum generation
 
 import json
+import math
+import inspect
 from collections import defaultdict
+
+from .utl import AlgMixin
 
 ##
 ## javascript conversion
 ##
 
 def stringify(value):
-    # short circuit for defined values
-    if isinstance(value, (Var, Const)):
-        return value.name
+    # convert functions to Functions
+    if callable(value):
+        return Fun(value)
 
-    # convert numeric values to lists
+    # short circuit for defined values
+    if isinstance(value, (Var, Con, Fun)):
+        return str(value)
+
+    # convert numeric values to lists (pd.Series, np.ndarray)
     if hasattr(value, 'tolist'):
         value = value.tolist()
 
     # convert to json
     return json.dumps(value)
+
+def convert(value):
+    if callable(value):
+        return f'{{ {Fun(value)} }}'
+    return str(value)
 
 def convert_args(opts):
     return ' '.join([
@@ -29,6 +42,8 @@ def indented(lines, n=2):
     return '\n'.join([ f'{tab}{line}' for line in lines ])
 
 def ensure_list(value):
+    if value is None:
+        return []
     if isinstance(value, (list, tuple)):
         return list(value)
     return [ value ]
@@ -62,6 +77,13 @@ def prefix_split(pres, attr):
     return attr1, attr0
 
 ##
+## gum constants
+##
+
+r2d = math.pi / 180
+d2r = 180 / math.pi
+
+##
 ## gum constructors
 ##
 
@@ -74,34 +96,37 @@ class Var:
 
     @classmethod
     def from_series(cls, s, name=None):
-        return cls(s.name or name, s.values)
+        return cls(s.name or name, s)
 
     def __str__(self):
         return self.name
 
     def define(self):
-        return f'{self.name} = {stringify(self.value)}'
+        return f'const {self.name} = {stringify(self.value)}'
 
-class Const:
-    def __init__(self, name):
-        self.name = name
+class Con(AlgMixin):
+    def __init__(self, value):
+        self.value = value
 
     def __str__(self):
-        return self.name
+        return self.value
 
-class ConstGen:
-    def __getattr__(self, name):
-        return Const(name)
-
-class VareGen:
+class VarGen:
     def __getattr__(self, name):
         def generator(value):
             return Var(name, value)
         return generator
 
+class ConGen:
+    def __getattr__(self, name):
+        return Con(name)
+
+    def __call__(self, value):
+        return Con(value)
+
 # singleton instances
-C = ConstGen()
-V = VareGen()
+V = VarGen()
+C = ConGen()
 
 # variable collection
 class Vars(dict):
@@ -159,33 +184,47 @@ class Element:
             return f'<{self.tag} {args}>\n{inner}\n</{self.tag}>'
 
 class Group(Element):
-    def __init__(self, children, tag='Group', **args):
-        super().__init__(tag, False, **args)
-        self.children = ensure_list(children)
+    def __init__(self, children=None, tag='Group', **args):
+        children = ensure_list(children)
+        unary = len(children) == 0
+        super().__init__(tag, unary, **args)
+        self.children = children
 
     def inner(self):
-        return indented(self.children)
+        return '\n'.join([ convert(c) for c in self.children ])
+
+## function elements
+
+class Fun:
+    def __init__(self, func):
+        sig = inspect.signature(func)
+        self.args = [ Con(p.name) for p in sig.parameters.values() ]
+        self.ret = func(*self.args)
+
+    def __str__(self):
+        args = ', '.join([ str(a) for a in self.args ])
+        return f'({args}) => ({self.ret})'
 
 ## layout elements
 
 class Box(Group):
-    def __init__(self, children, **args):
+    def __init__(self, children=None, **args):
         super().__init__(children, tag='Box', **args)
 
 class Frame(Group):
-    def __init__(self, children, **args):
+    def __init__(self, children=None, **args):
         super().__init__(children, tag='Frame', **args)
 
 class Stack(Group):
-    def __init__(self, children, **args):
+    def __init__(self, children=None, **args):
         super().__init__(children, tag='Stack', **args)
 
 class HStack(Group):
-    def __init__(self, children, **args):
+    def __init__(self, children=None, **args):
         super().__init__(children, tag='HStack', **args)
 
 class VStack(Group):
-    def __init__(self, children, **args):
+    def __init__(self, children=None, **args):
         super().__init__(children, tag='VStack', **args)
 
 ## shape elements
@@ -209,29 +248,33 @@ class Circle(Element):
 ## text elements
 
 class Text(Group):
-    def __init__(self, children, **kwargs):
+    def __init__(self, children=None, **kwargs):
         super().__init__(children, tag='Text', **kwargs)
 
 ## plot elements
 
 class DataPath(Element):
-    def __init__(self, **kwargs):
+    def __init__(self, children=None, **kwargs):
         super().__init__('DataPath', True, **kwargs)
 
 class DataPoints(Group):
-    def __init__(self, children, **kwargs):
+    def __init__(self, children=None, **kwargs):
         super().__init__(children, tag='DataPoints', **kwargs)
 
+class Graph(Group):
+    def __init__(self, children=None, **kwargs):
+        super().__init__(children, tag='Graph', **kwargs)
+
 class Plot(Group):
-    def __init__(self, children, **args):
+    def __init__(self, children=None, **args):
         super().__init__(children, tag='Plot', **args)
 
 ## container elements
 
 class TitleFrame(Group):
-    def __init__(self, children, **args):
+    def __init__(self, children=None, **args):
         super().__init__(children, tag='TitleFrame', **args)
 
 class Slide(Group):
-    def __init__(self, children, **args):
+    def __init__(self, children=None, **args):
         super().__init__(children, tag='Slide', **args)

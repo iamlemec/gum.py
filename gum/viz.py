@@ -55,6 +55,7 @@ def plot(frame, size=None, pixels=None, format=None, method=None, show=True, **k
     # value setters
     index = Var.from_series(frame.index, name='index')
     vars = Vars.from_dataframe(frame)
+    vars1 = Vars(index=index, **vars)
 
     # data plotters
     lines = [
@@ -64,10 +65,10 @@ def plot(frame, size=None, pixels=None, format=None, method=None, show=True, **k
 
     # generate svg code
     plot = Plot(lines, **plot_args)
-    code = Gum(plot, vars=[index, vars])
 
     # render svg
     if show:
+        code = Gum(plot, vars=vars1)
         display(code, size=size, pixels=pixels, format=format, method=method)
     else:
-        return plot, [index, vars]
+        return plot, vars1
