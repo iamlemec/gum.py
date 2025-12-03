@@ -1,6 +1,6 @@
 # terminal tools
 
-import sys
+import os
 import json
 import base64
 import threading
@@ -29,7 +29,8 @@ def chafa(data, **kwargs):
 ## server interface
 ##
 
-GUM_PATH = '../gum.js/src/pipe.js'
+LIB_PATH = os.path.dirname(__file__)
+GUM_PATH = os.path.join(LIB_PATH, 'gum.js/src/pipe.js')
 
 class GumUnixPipe:
     def __init__(self):
