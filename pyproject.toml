@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gum"
+version = "0.1.0"
+description = "Language for vector graphics generation with Python bindings"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "Douglas Hanley"}
+]
+dependencies = [
+    "numpy",
+    "pandas",
+]
+
+[project.urls]
+Homepage = "https://github.com/CompendiumLabs/gum.py"
+
+[tool.setuptools]
+packages = ["gum"]
+
+[tool.setuptools.package-data]
+gum = [
+    "gum.js/dist/*.js",
+    "gum.js/dist/fonts/*.ttf",
+]

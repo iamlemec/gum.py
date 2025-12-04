@@ -30,7 +30,7 @@ def chafa(data, **kwargs):
 ##
 
 LIB_PATH = os.path.dirname(__file__)
-GUM_PATH = os.path.join(LIB_PATH, 'gum.js/src/pipe.js')
+GUM_PATH = os.path.join(LIB_PATH, 'gum.js/dist/gum.js')
 
 class GumUnixPipe:
     def __init__(self):
