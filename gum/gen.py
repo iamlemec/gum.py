@@ -71,7 +71,7 @@ def ensure_list(value):
 
 def prefix_split(pres, attr):
     # handle single prefix
-    if not isinstance(pres, list):
+    if not isinstance(pres, (tuple, list)):
         pres = [ pres ]
         squeeze = True
     else:

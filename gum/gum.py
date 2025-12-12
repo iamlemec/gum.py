@@ -26,6 +26,25 @@ def chafa(data, **kwargs):
     subprocess.run([ 'chafa', *sargs, '-' ], input=data, stderr=subprocess.DEVNULL)
 
 ##
+## error handling
+##
+
+class GumErrorType:
+    UNKNOWN = 'UNKNOWN'
+    NOCODE = 'NOCODE'
+    NORETURN = 'NORETURN'
+    NOELEMENT = 'NOELEMENT'
+    PARSE = 'PARSE'
+    GENERATE = 'GENERATE'
+    RENDER = 'RENDER'
+
+class GumError(Exception):
+    def __init__(self, error_type, error_message):
+        self.error_type = error_type
+        self.error_message = error_message
+        super().__init__(self.error_message)
+
+##
 ## server interface
 ##
 
@@ -67,7 +86,8 @@ class GumUnixPipe:
             self.init()
 
         # send request
-        self.proc.stdin.write(json.dumps(request) + '\n')
+        request1 = { k: v for k, v in request.items() if v is not None }
+        self.proc.stdin.write(json.dumps(request1) + '\n')
         self.proc.stdin.flush()
 
         # get reply
@@ -81,7 +101,9 @@ class GumUnixPipe:
 
         # check for errors
         if not ok:
-            raise ValueError(f'[gum server] {result}')
+            etype = result['error']
+            emsg = result['message']
+            raise GumError(etype, emsg)
 
         # return response
         return result
@@ -120,9 +142,9 @@ def evaluate(code, **kwargs):
 def render(code, **kwargs):
     return server.render(code, **kwargs)
 
-def display(code, size=None, theme='dark', format=None, method=None, **kwargs):
+def display(code, size=75, theme='dark', format='svg', method=None, **kwargs):
     # evaluate or render
-    if format is None or format == 'svg':
+    if format == 'svg':
         data = evaluate(str(code), theme=theme, **kwargs).encode()
     elif format == 'png':
         data = render(str(code), theme=theme, **kwargs)
@@ -130,7 +152,7 @@ def display(code, size=None, theme='dark', format=None, method=None, **kwargs):
         raise ValueError(f'Invalid format: {format}')
 
     # display on terminal
-    chafa(data, size=size or 75, format=method)
+    chafa(data, size=size, format=method)
 
 def display_file(path, **kwargs):
     code = readtext(path)

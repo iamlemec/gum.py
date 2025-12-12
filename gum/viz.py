@@ -1,8 +1,6 @@
 # gum visualization
 
 from itertools import cycle
-import numpy as np
-import pandas as pd
 
 from .gen import C, prefix_split, Var, Vars, Gum, Box, DataPath, Plot
 from .gum import display
@@ -11,7 +9,7 @@ from .gum import display
 ## themes
 ##
 
-DEFAULT = {
+DEFAULT_PLOT = {
     'aspect': 2,
     'grid': True,
     'margin': (0.2, 0.15),
@@ -32,20 +30,29 @@ COLORS = [
 ##
 
 def test_trig():
+    import numpy as np
+    import pandas as pd
+
     df = pd.DataFrame({ 'theta': np.linspace(0, 2 * np.pi, 100) })
     df['sin'] = np.sin(df['theta'])
     df['cos'] = np.cos(df['theta'])
     return df.set_index('theta')
 
 def test_brown(N=3, T=100):
+    import numpy as np
+    import pandas as pd
+
     return pd.DataFrame({
         f'stock_{i}': np.random.randn(T).cumsum() / np.sqrt(T) for i in range(N)
     })
 
-def plot(frame, size=None, pixels=None, format=None, method=None, show=True, **kwargs0):
+def plot(frame, show=True, **kwargs0):
+    import numpy as np
+    import pandas as pd
+
     # collect arguments
-    kwargs = { **DEFAULT, **kwargs0 }
-    line_args, plot_args = prefix_split('line', kwargs)
+    kwargs = { **DEFAULT_PLOT, **kwargs0 }
+    (line_args, display_args), plot_args = prefix_split(('line', 'display'), kwargs)
 
     # convert to dataframe
     if isinstance(frame, (np.ndarray, list, tuple)):
@@ -70,6 +77,6 @@ def plot(frame, size=None, pixels=None, format=None, method=None, show=True, **k
     # render svg
     if show:
         code = Gum(plot, vars=vars1)
-        display(code, size=size, pixels=pixels, format=format, method=method)
+        display(code, **display_args)
     else:
         return plot, vars1
