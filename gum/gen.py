@@ -138,42 +138,6 @@ class ConGen:
 V = VarGen()
 C = ConGen()
 
-# variable collection
-class Vars(dict):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-    @classmethod
-    def from_dataframe(cls, df):
-        return cls(**{ col: Var.from_series(df[col]) for col in df })
-
-    def __getattr__(self, name):
-        return self[name]
-
-    def __setattr__(self, name, value):
-        self[name] = value
-
-    def define(self):
-        return '\n'.join([ v.define() for v in self.values() ])
-
-## top level
-
-class Gum:
-    def __init__(self, cont, vars=None):
-        if vars is None:
-            vars = []
-        elif not isinstance(vars, list):
-            vars = [ vars ]
-        self.vars = vars
-        self.content = cont
-
-    def __str__(self):
-        header = '\n'.join([ v.define() for v in self.vars ])
-        if len(header) > 0:
-            return f'{header}\n\nreturn {self.content}'
-        else:
-            return str(self.content)
-
 ## core elements
 
 class Element:
@@ -292,6 +256,22 @@ class Plot(Group):
     def __init__(self, *children, **args):
         super().__init__(*children, tag='Plot', **args)
 
+##
+## bar elements
+##
+
+class VBar(Element):
+    def __init__(self, **kwargs):
+        super().__init__('VBar', True, **kwargs)
+
+class HBar(Element):
+    def __init__(self, **kwargs):
+        super().__init__('HBar', True, **kwargs)
+
+class BarPlot(Group):
+    def __init__(self, *children, **args):
+        super().__init__(*children, tag='BarPlot', **args)
+
 ## container elements
 
 class TitleFrame(Group):
@@ -301,3 +281,65 @@ class TitleFrame(Group):
 class Slide(Group):
     def __init__(self, *children, **args):
         super().__init__(*children, tag='Slide', **args)
+
+##
+## dataframe notion
+##
+
+def ensure_var(var, name=None):
+    import numpy as np
+    import pandas as pd
+    if isinstance(var, (np.ndarray, list, tuple)):
+        var = pd.Series(var)
+    elif isinstance(var, pd.Index):
+        var = var.to_series()
+    if isinstance(var, pd.Series):
+        var = Var.from_series(var, name=name)
+    elif not isinstance(var, Var):
+        raise ValueError(f'Unsupported type: {type(var)}')
+    return var
+
+class GumData:
+    def __init__(self, data, index=None):
+        self.index = ensure_var(index, name='index')
+        self._data = [ ensure_var(v, name=f'value_{i}') for i, v in enumerate(data) ]
+
+    @classmethod
+    def from_frame(cls, frame):
+        data = [ frame[col] for col in frame ]
+        return cls(data, index=frame.index)
+
+    def __iter__(self):
+        return iter(self._data)
+
+    def __len__(self):
+        return len(self._data)
+
+    def __getitem__(self, name):
+        return self._data[name]
+
+    def __setitem__(self, name, value):
+        self._data[name] = ensure_var(value, name=name)
+
+    def define(self):
+        return '\n'.join([ v.define() for v in [ self.index, *self._data ] ])
+
+##
+## top level
+##
+
+class Gum:
+    def __init__(self, cont, vars=None):
+        if vars is None:
+            vars = []
+        elif not isinstance(vars, (tuple, list)):
+            vars = [ vars ]
+        self.vars = vars
+        self.content = cont
+
+    def __str__(self):
+        header = '\n'.join([ v.define() for v in self.vars ])
+        if len(header) > 0:
+            return f'{header}\n\nreturn {self.content}'
+        else:
+            return str(self.content)
