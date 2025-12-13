@@ -11,7 +11,7 @@ from .gum import display
 
 DEFAULT_BASE = {
     'aspect': 2,
-    'margin': 0.1,
+    'margin': 0.15,
 }
 
 DEFAULT_PLOT = {
@@ -41,20 +41,21 @@ COLORS = [
 ## plotting interface
 ##
 
-def test_trig():
+def test_data(which='brown', T=500, L=3, N=20, K1=1, K2=10):
     import numpy as np
     import pandas as pd
-    df = pd.DataFrame({ 'theta': np.linspace(0, 2 * np.pi, 100) })
-    df['sin'] = np.sin(df['theta'])
-    df['cos'] = np.cos(df['theta'])
-    return df.set_index('theta')
-
-def test_brown(N=3, T=100):
-    import numpy as np
-    import pandas as pd
-    return pd.DataFrame({
-        f'stock_{i}': np.random.randn(T).cumsum() / np.sqrt(T) for i in range(N)
-    })
+    if which == 'trig':
+        df = pd.DataFrame({ 'theta': np.linspace(0, 2 * np.pi, 100) })
+        return df.assign(sin=np.sin(df.theta), cos=np.cos(df.theta)).set_index('theta')
+    elif which == 'brown':
+        return pd.DataFrame({
+            f'stock_{i}': np.random.randn(T).cumsum() / np.sqrt(T) for i in range(L)
+        })
+    elif which == 'bars':
+        codes = np.random.randint(K1, K2, N)
+        return pd.Series({ chr(65+c): v for c, v in enumerate(codes) }, name='value')
+    else:
+        raise ValueError(f'Unknown test data: {which}')
 
 def ensure_series(data):
     import numpy as np
@@ -108,12 +109,12 @@ def points(frame, shape=None, **kwargs):
 
     # data plotters
     points = [
-        DataPoints(shape, xvals=data.index, yvals=v, **{'stroke': c, 'fill': c, **point_args})
+        DataPoints(xvals=data.index, yvals=v, shape=shape, **{'stroke': c, 'fill': c, **point_args})
         for v, c in zip(data, cycle(COLORS))
     ]
 
     # generate svg code
-    plot = Plot(points, **plot_args)
+    plot = Plot(*points, **plot_args)
     return Gum(plot, vars=data)
 
 def bars(series, **kwargs):
