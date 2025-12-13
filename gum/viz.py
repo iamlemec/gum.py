@@ -11,7 +11,7 @@ from .gum import display
 
 DEFAULT_BASE = {
     'aspect': 2,
-    'margin': (0.2, 0.15),
+    'margin': 0.1,
 }
 
 DEFAULT_PLOT = {
@@ -78,10 +78,10 @@ def ensure_frame(data):
         raise ValueError(f'Unsupported type: {type(data)}')
     return data
 
-def lines(frame, show=True, **kwargs0):
+def lines(frame, **kwargs):
     # collect arguments
-    kwargs = { **DEFAULT_PLOT, **kwargs0 }
-    (line_args, display_args), plot_args = prefix_split(('line', 'display'), kwargs)
+    args = { **DEFAULT_PLOT, **kwargs }
+    line_args, plot_args = prefix_split('line', args)
 
     # convert to dataframe
     frame = ensure_frame(frame)
@@ -95,18 +95,12 @@ def lines(frame, show=True, **kwargs0):
 
     # generate svg code
     plot = Plot(lines, **plot_args)
-    code = Gum(plot, vars=data)
+    return Gum(plot, vars=data)
 
-    # render svg
-    if show:
-        display(code, **display_args)
-    else:
-        return code
-
-def points(frame, shape=None, show=True, **kwargs0):
+def points(frame, shape=None, **kwargs):
     # collect arguments
-    kwargs = { **DEFAULT_PLOT, **kwargs0 }
-    (point_args, display_args), plot_args = prefix_split(('point', 'display'), kwargs)
+    args = { **DEFAULT_PLOT, **kwargs }
+    point_args, plot_args = prefix_split('point', args)
 
     # convert to dataframe
     frame = ensure_frame(frame)
@@ -120,28 +114,16 @@ def points(frame, shape=None, show=True, **kwargs0):
 
     # generate svg code
     plot = Plot(points, **plot_args)
-    code = Gum(plot, vars=data)
+    return Gum(plot, vars=data)
 
-    # render svg
-    if show:
-        display(code, **display_args)
-    else:
-        return code
-
-def bars(series, show=True, **kwargs0):
+def bars(series, **kwargs):
     # collect arguments
-    kwargs = { **DEFAULT_BARS, **kwargs0 }
-    (bar_args, display_args), plot_args = prefix_split(('bar', 'display'), kwargs)
+    args = { **DEFAULT_BARS, **kwargs }
+    bar_args, plot_args = prefix_split('bar', args)
 
     # convert to series
     series = ensure_series(series)
 
     # generate svg code
     bars = [ VBar(label=k, size=v, **bar_args) for k, v in series.items() ]
-    plot = BarPlot(*bars, **plot_args)
-
-    # render svg
-    if show:
-        display(plot, **display_args)
-    else:
-        return plot
+    return BarPlot(*bars, **plot_args)

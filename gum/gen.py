@@ -5,7 +5,7 @@ import inspect
 from collections import defaultdict
 
 from .utl import AlgMixin
-from .gum import evaluate
+from .gum import evaluate, display
 
 ##
 ## javascript conversion
@@ -141,7 +141,23 @@ C = ConGen()
 
 ## core elements
 
-class Element:
+def is_notebook():
+    try:
+        from IPython import get_ipython
+        return 'IPKernelApp' in get_ipython().config
+    except:
+        return False
+
+class DisplayMixin:
+    def _ipython_display_(self):
+        if is_notebook():
+            from IPython.display import display_svg
+            svg = evaluate(self)
+            display_svg(svg, raw=True)
+        else:
+            display(self)
+
+class Element(DisplayMixin):
     def __init__(self, tag, unary, **args):
         self.tag = tag
         self.unary = unary
@@ -157,9 +173,6 @@ class Element:
         else:
             inner = self.inner()
             return f'<{self.tag} {args}>\n{inner}\n</{self.tag}>'
-
-    def _repr_svg_(self):
-        return evaluate(self)
 
 class Group(Element):
     def __init__(self, *children, tag='Group', **args):
@@ -332,7 +345,7 @@ class GumData:
 ## top level
 ##
 
-class Gum:
+class Gum(DisplayMixin):
     def __init__(self, cont, vars=None):
         if vars is None:
             vars = []
@@ -347,6 +360,3 @@ class Gum:
             return f'{header}\n\nreturn {self.content}'
         else:
             return str(self.content)
-
-    def _repr_svg_(self):
-        return evaluate(self)
