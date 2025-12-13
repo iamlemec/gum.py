@@ -21,8 +21,8 @@ packages = ["gum"]
 
 [tool.setuptools.package-data]
 gum = [
-    "gum/*.js",
-    "gum.js/dist/fonts/IBMPlexSans-Variable.ttf",
-    "gum.js/dist/fonts/IBMPlexMono-Regular.ttf",
-    "gum.js/dist/fonts/IBMPlexSans-Bold.ttf",
+    "gum.js/gum.js",
+    "gum.js/fonts/IBMPlexSans-Variable.ttf",
+    "gum.js/fonts/IBMPlexMono-Regular.ttf",
+    "gum.js/fonts/IBMPlexMono-Bold.ttf",
 ]
