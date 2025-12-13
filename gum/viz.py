@@ -11,7 +11,7 @@ from .gum import display
 
 DEFAULT_BASE = {
     'aspect': 2,
-    'margin': 0.15,
+    'margin': 0.1,
 }
 
 DEFAULT_PLOT = {
@@ -23,9 +23,8 @@ DEFAULT_PLOT = {
 DEFAULT_BARS = {
     **DEFAULT_BASE,
     'bar_border': 0,
-    'bar_rounded': True,
-    'bar_fill': '#888',
-    'bar_fill_opacity': 0.5,
+    'bar_rounded': (0.2, 0.2, 0, 0),
+    'bar_fill': C.blue,
 }
 
 COLORS = [
