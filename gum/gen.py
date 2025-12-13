@@ -5,6 +5,7 @@ import inspect
 from collections import defaultdict
 
 from .utl import AlgMixin
+from .gum import evaluate
 
 ##
 ## javascript conversion
@@ -156,6 +157,9 @@ class Element:
         else:
             inner = self.inner()
             return f'<{self.tag} {args}>\n{inner}\n</{self.tag}>'
+
+    def _repr_svg_(self):
+        return evaluate(self)
 
 class Group(Element):
     def __init__(self, *children, tag='Group', **args):
@@ -343,3 +347,6 @@ class Gum:
             return f'{header}\n\nreturn {self.content}'
         else:
             return str(self.content)
+
+    def _repr_svg_(self):
+        return evaluate(self)

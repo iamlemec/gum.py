@@ -95,15 +95,15 @@ def lines(frame, show=True, **kwargs0):
 
     # generate svg code
     plot = Plot(lines, **plot_args)
+    code = Gum(plot, vars=data)
 
     # render svg
     if show:
-        code = Gum(plot, vars=data)
         display(code, **display_args)
     else:
-        return plot, data
+        return code
 
-def points(frame, show=True, **kwargs0):
+def points(frame, shape=None, show=True, **kwargs0):
     # collect arguments
     kwargs = { **DEFAULT_PLOT, **kwargs0 }
     (point_args, display_args), plot_args = prefix_split(('point', 'display'), kwargs)
@@ -114,19 +114,19 @@ def points(frame, show=True, **kwargs0):
 
     # data plotters
     points = [
-        DataPoints(xvals=data.index, yvals=v, **{'stroke': c, 'fill': c, **point_args})
+        DataPoints(shape, xvals=data.index, yvals=v, **{'stroke': c, 'fill': c, **point_args})
         for v, c in zip(data, cycle(COLORS))
     ]
 
     # generate svg code
     plot = Plot(points, **plot_args)
+    code = Gum(plot, vars=data)
 
     # render svg
     if show:
-        code = Gum(plot, vars=data)
         display(code, **display_args)
     else:
-        return plot, data
+        return code
 
 def bars(series, show=True, **kwargs0):
     # collect arguments

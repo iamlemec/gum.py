@@ -49,7 +49,7 @@ class GumError(Exception):
 ##
 
 LIB_PATH = os.path.dirname(__file__)
-GUM_PATH = os.path.join(LIB_PATH, 'gum.js/dist/gum.js')
+GUM_PATH = os.path.join(LIB_PATH, 'gum.js/gum.js')
 
 class GumUnixPipe:
     def __init__(self):
@@ -137,10 +137,10 @@ def restart():
     server.restart()
 
 def evaluate(code, **kwargs):
-    return server.evaluate(code, **kwargs)
+    return server.evaluate(str(code), **kwargs)
 
 def render(code, **kwargs):
-    return server.render(code, **kwargs)
+    return server.render(str(code), **kwargs)
 
 def display(code, size=75, theme='dark', format='svg', method=None, **kwargs):
     # evaluate or render

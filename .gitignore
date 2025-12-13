@@ -1,1 +1,7 @@
 __pycache__
+.ipynb_checkpoints
+dist
+gum.egg-info
+gum/gum.js
+package-lock.json
+node_modules
