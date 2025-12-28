@@ -405,8 +405,3 @@ DEMOS = {
 def demo(name):
     func = DEMOS[name]
     return func()
-
-if __name__ == '__main__':
-    name = sys.argv[1]
-    elem = demo(name)
-    display(elem, size=50)
