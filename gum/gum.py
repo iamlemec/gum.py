@@ -142,7 +142,7 @@ def evaluate(code, **kwargs):
 def render(code, **kwargs):
     return server.render(str(code), **kwargs)
 
-def display(code, size=75, theme='dark', format='svg', method=None, **kwargs):
+def display(code, size=50, theme='dark', format='svg', method=None, **kwargs):
     # evaluate or render
     if format == 'svg':
         data = evaluate(str(code), theme=theme, **kwargs).encode()

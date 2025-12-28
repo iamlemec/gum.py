@@ -2,8 +2,8 @@
 
 from itertools import cycle
 
-from .gen import C, prefix_split, GumData, Gum, DataPath, DataPoints, Plot, BarPlot, VBar
-from .gum import display
+from .gen import C, GumData, Gum, DataPath, DataPoints, Plot, BarPlot, VBar
+from .utl import prefix_split
 
 ##
 ## themes
@@ -23,7 +23,7 @@ DEFAULT_PLOT = {
 DEFAULT_BARS = {
     **DEFAULT_BASE,
     'bar_border': 0,
-    'bar_rounded': (0.2, 0.2, 0, 0),
+    'bar_rounded': (0.1, 0.1, 0, 0),
     'bar_fill': C.blue,
 }
 

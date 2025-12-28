@@ -1,126 +1,10 @@
 # gum generation
 
-import json
-import inspect
-from collections import defaultdict
-
-from .utl import AlgMixin
-from .gum import evaluate, display
-
-##
-## javascript conversion
-##
-
-def stringify(value):
-    # convert functions to Functions
-    if callable(value):
-        value = Fun(value)
-
-    # convert numeric values to lists
-    if hasattr(value, 'tolist'):
-        value = value.tolist()
-
-    # short circuit for gum values
-    if isinstance(value, (Var, Con, Fun, Element)):
-        return str(value)
-
-    # handle basic json types
-    if value is None:
-        return 'null'
-    elif isinstance(value, bool):
-        return 'true' if value else 'false'
-    elif isinstance(value, int):
-        return str(value)
-    elif isinstance(value, float):
-        return f'{value:g}'
-    elif isinstance(value, str):
-        return json.dumps(value) # handles escaping
-    elif isinstance(value, (list, tuple)):
-        return f'[{", ".join([ stringify(v) for v in value ])}]'
-    elif isinstance(value, dict):
-        return f'{{ {", ".join([ f'"{k}": {stringify(v)}' for k, v in value.items() ])} }}'
-    else:
-        raise ValueError(f'Unsupported type: {type(value)}')
-
-def convert_child(value):
-    enc = stringify(value)
-    if isinstance(value, Element):
-        return enc
-    else:
-        return f'{{ {enc} }}'
-
-def convert_args(opts):
-    return ' '.join([
-        f'{k}={{{stringify(v)}}}' for k, v in opts.items()
-    ])
-
-def indented(text, n=2):
-    tab = n * ' '
-    lines = text.split('\n')
-    return '\n'.join([ f'{tab}{line}' for line in lines ])
-
-def ensure_list(value):
-    if value is None:
-        return []
-    if isinstance(value, (list, tuple)):
-        return list(value)
-    return [ value ]
-
-##
-## arg handlers
-##
-
-def prefix_split(pres, attr):
-    # handle single prefix
-    if not isinstance(pres, (tuple, list)):
-        pres = [ pres ]
-        squeeze = True
-    else:
-        squeeze = False
-
-    # collect attributes
-    pattr = defaultdict(dict)
-    attr0 = {}
-    for key, val in attr.items():
-        for p in pres:
-            if key.startswith(f'{p}_'):
-                k1 = key[len(p)+1:]
-                pattr[p][k1] = val
-                break
-        else:
-            attr0[key] = val
-
-    # return attributes
-    attr1 = pattr[pres[0]] if squeeze else [ pattr[p] for p in pres ]
-    return attr1, attr0
+from .utl import Var, Con, Element, DisplayMixin, DataGroup, Group
 
 ##
 ## gum constructors
 ##
-
-## values
-
-class Var(AlgMixin):
-    def __init__(self, name, value):
-        self.name = name
-        self.value = value
-
-    @classmethod
-    def from_series(cls, s, name=None):
-        return cls(s.name or name, s)
-
-    def __str__(self):
-        return self.name
-
-    def define(self):
-        return f'const {self.name} = {stringify(self.value)}'
-
-class Con(AlgMixin):
-    def __init__(self, value):
-        self.value = value
-
-    def __str__(self):
-        return self.value
 
 class VarGen:
     def __getattr__(self, name):
@@ -139,61 +23,13 @@ class ConGen:
 V = VarGen()
 C = ConGen()
 
-## core elements
+##
+## context elements
+##
 
-def is_notebook():
-    try:
-        from IPython import get_ipython
-        return 'IPKernelApp' in get_ipython().config
-    except:
-        return False
-
-class DisplayMixin:
-    def _ipython_display_(self):
-        if is_notebook():
-            from IPython.display import display_svg
-            svg = evaluate(self)
-            display_svg(svg, raw=True)
-        else:
-            display(self)
-
-class Element(DisplayMixin):
-    def __init__(self, tag, unary, **args):
-        self.tag = tag
-        self.unary = unary
-        self.args = args
-
-    def inner(self):
-        return ''
-
-    def __str__(self):
-        args = convert_args(self.args)
-        if self.unary:
-            return f'<{self.tag} {args} />'
-        else:
-            inner = self.inner()
-            return f'<{self.tag} {args}>\n{inner}\n</{self.tag}>'
-
-class Group(Element):
-    def __init__(self, *children, tag='Group', **args):
-        unary = len(children) == 0
-        super().__init__(tag, unary, **args)
-        self.children = children
-
-    def inner(self):
-        return '\n'.join([ indented(convert_child(c)) for c in self.children ])
-
-## function elements
-
-class Fun:
-    def __init__(self, func):
-        sig = inspect.signature(func)
-        self.args = [ Con(p.name) for p in sig.parameters.values() ]
-        self.ret = func(*self.args)
-
-    def __str__(self):
-        args = ', '.join([ str(a) for a in self.args ])
-        return f'({args}) => ({self.ret})'
+class Context(Element):
+    def __init__(self, **args):
+        super().__init__('Context', True, **args)
 
 ## layout elements
 
@@ -216,6 +52,10 @@ class HStack(Group):
 class VStack(Group):
     def __init__(self, *children, **args):
         super().__init__(*children, tag='VStack', **args)
+
+class Grid(Group):
+    def __init__(self, *children, **args):
+        super().__init__(*children, tag='Grid', **args)
 
 ## shape elements
 
@@ -249,13 +89,37 @@ class VLine(Element):
     def __init__(self, **kwargs):
         super().__init__('VLine', True, **kwargs)
 
+class Polyline(DataGroup):
+    def __init__(self, *children, **kwargs):
+        super().__init__(*children, tag='Polyline', **kwargs)
+
+class Polygon(DataGroup):
+    def __init__(self, *children, **kwargs):
+        super().__init__(*children, tag='Polygon', **kwargs)
+
+class Points(DataGroup):
+    def __init__(self, *children, **kwargs):
+        super().__init__(*children, tag='Points', **kwargs)
+
+class Arrow(Element):
+    def __init__(self, **kwargs):
+        super().__init__('Arrow', True, **kwargs)
+
 ## text elements
 
 class Text(Group):
     def __init__(self, *children, **kwargs):
         super().__init__(*children, tag='Text', **kwargs)
 
-## plot elements
+class TextFrame(Group):
+    def __init__(self, *children, **kwargs):
+        super().__init__(*children, tag='TextFrame', **kwargs)
+
+class Equation(Group):
+    def __init__(self, *children, **kwargs):
+        super().__init__(*children, tag='Equation', **kwargs)
+
+## data elements
 
 class DataPath(Element):
     def __init__(self, *children, **kwargs):
@@ -265,6 +129,20 @@ class DataPoints(Group):
     def __init__(self, *children, **kwargs):
         super().__init__(*children, tag='DataPoints', **kwargs)
 
+class DataField(Element):
+    def __init__(self, **kwargs):
+        super().__init__('DataField', True, **kwargs)
+
+class DataFill(Element):
+    def __init__(self, **kwargs):
+        super().__init__('DataFill', True, **kwargs)
+
+class DataPoly(Element):
+    def __init__(self, **kwargs):
+        super().__init__('DataPoly', True, **kwargs)
+
+## graph elements
+
 class Graph(Group):
     def __init__(self, *children, **kwargs):
         super().__init__(*children, tag='Graph', **kwargs)
@@ -273,9 +151,25 @@ class Plot(Group):
     def __init__(self, *children, **args):
         super().__init__(*children, tag='Plot', **args)
 
+class Axis(Group):
+    def __init__(self, *children, **kwargs):
+        super().__init__(*children, tag='Axis', **kwargs)
+
+class HAxis(Group):
+    def __init__(self, *children, **kwargs):
+        super().__init__(*children, tag='HAxis', **kwargs)
+
+class VAxis(Group):
+    def __init__(self, *children, **kwargs):
+        super().__init__(*children, tag='VAxis', **kwargs)
+
 ##
 ## bar elements
 ##
+
+class Bar(Element):
+    def __init__(self, **kwargs):
+        super().__init__('Bar', True, **kwargs)
 
 class VBar(Element):
     def __init__(self, **kwargs):
@@ -288,6 +182,25 @@ class HBar(Element):
 class BarPlot(Group):
     def __init__(self, *children, **args):
         super().__init__(*children, tag='BarPlot', **args)
+
+## network elements
+
+
+class TextNode(Group):
+    def __init__(self, *children, **kwargs):
+        super().__init__(*children, tag='TextNode', **kwargs)
+
+class Node(Group):
+    def __init__(self, *children, **kwargs):
+        super().__init__(*children, tag='Node', **kwargs)
+
+class Edge(Element):
+    def __init__(self, **kwargs):
+        super().__init__('Edge', True, **kwargs)
+
+class Network(Group):
+    def __init__(self, *children, **kwargs):
+        super().__init__(*children, tag='Network', **kwargs)
 
 ## container elements
 
