@@ -57,6 +57,10 @@ class Grid(Group):
     def __init__(self, *children, **args):
         super().__init__(*children, tag='Grid', **args)
 
+class Points(Element):
+    def __init__(self, **kwargs):
+        super().__init__('Points', True, **kwargs)
+
 ## shape elements
 
 class Rect(Element):
@@ -121,25 +125,25 @@ class Equation(Group):
 
 ## data elements
 
-class DataPath(Element):
+class SymPoints(Group):
     def __init__(self, *children, **kwargs):
-        super().__init__('DataPath', True, **kwargs)
+        super().__init__(*children, tag='SymPoints', **kwargs)
 
-class DataPoints(Group):
+class SymLine(Element):
     def __init__(self, *children, **kwargs):
-        super().__init__(*children, tag='DataPoints', **kwargs)
+        super().__init__('SymLine', True, **kwargs)
 
-class DataField(Element):
+class SymField(Element):
     def __init__(self, **kwargs):
-        super().__init__('DataField', True, **kwargs)
+        super().__init__('SymField', True, **kwargs)
 
-class DataFill(Element):
+class SymFill(Element):
     def __init__(self, **kwargs):
-        super().__init__('DataFill', True, **kwargs)
+        super().__init__('SymFill', True, **kwargs)
 
-class DataPoly(Element):
+class SymPoly(Element):
     def __init__(self, **kwargs):
-        super().__init__('DataPoly', True, **kwargs)
+        super().__init__('SymPoly', True, **kwargs)
 
 ## graph elements
 

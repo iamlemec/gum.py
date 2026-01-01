@@ -10,6 +10,9 @@ import subprocess
 ## chafa interface
 ##
 
+def snake_case(s):
+    return s.replace('_', '-')
+
 def readtext(path):
     with open(path, 'r') as fid:
         return fid.read()
@@ -21,7 +24,7 @@ def readbin(path):
 def chafa(data, **kwargs):
     data = readbin(data) if isinstance(data, str) else data
     sargs = sum([
-        [ f'--{k}', f'{v}' ] for k, v in kwargs.items() if v is not None
+        [ f'--{snake_case(k)}', f'{v}' ] for k, v in kwargs.items() if v is not None
     ], [])
     subprocess.run([ 'chafa', *sargs, '-' ], input=data, stderr=subprocess.DEVNULL)
 
@@ -142,7 +145,7 @@ def evaluate(code, **kwargs):
 def render(code, **kwargs):
     return server.render(str(code), **kwargs)
 
-def display(code, size=50, theme='dark', format='svg', method=None, **kwargs):
+def display(code, size='80x25', theme='dark', format='svg', method=None, **kwargs):
     # evaluate or render
     if format == 'svg':
         data = evaluate(str(code), theme=theme, **kwargs).encode()

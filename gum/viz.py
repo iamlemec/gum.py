@@ -2,7 +2,7 @@
 
 from itertools import cycle
 
-from .gen import C, GumData, Gum, DataPath, DataPoints, Plot, BarPlot, VBar
+from .gen import C, GumData, Gum, SymLine, SymPoints, Plot, BarPlot, VBar
 from .utl import prefix_split
 
 ##
@@ -89,12 +89,12 @@ def lines(frame, **kwargs):
 
     # data plotters
     lines = [
-        DataPath(xvals=data.index, yvals=v, **{'stroke': c, **line_args})
+        SymLine(xvals=data.index, yvals=v, **{'stroke': c, **line_args})
         for v, c in zip(data, cycle(COLORS))
     ]
 
     # generate svg code
-    plot = Plot(lines, **plot_args)
+    plot = Plot(*lines, **plot_args)
     return Gum(plot, vars=data)
 
 def points(frame, shape=None, **kwargs):
@@ -108,7 +108,7 @@ def points(frame, shape=None, **kwargs):
 
     # data plotters
     points = [
-        DataPoints(xvals=data.index, yvals=v, shape=shape, **{'stroke': c, 'fill': c, **point_args})
+        SymPoints(xvals=data.index, yvals=v, shape=shape, **{'stroke': c, 'fill': c, **point_args})
         for v, c in zip(data, cycle(COLORS))
     ]
 
