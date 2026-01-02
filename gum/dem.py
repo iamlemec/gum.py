@@ -82,8 +82,8 @@ def demo_colors():
     size_func = lambda x, y: 0.1 * (1 + C.abs(y)) / 2
     xticks = [(x*C.pi, f'{x:.2g} π') for x in linspace(0, 2, 6)[1:]]
     plot = G.Plot(
-        G.DataPath(fy=func),
-        G.DataPoints(shape_func, fy=func, size=size_func, N=21),
+        G.SymLine(fy=func),
+        G.SymPoints(shape_func, fy=func, size=size_func, N=21),
         xlim=(0, 2*C.pi),
         ylim=(-1, 1),
         aspect=1.5,
@@ -98,9 +98,9 @@ def demo_colors():
     )
     return G.Gum(plot, vars=[pal])
 
-def demo_datafield():
+def demo_symfield():
     return G.Frame(
-        G.DataField(
+        G.SymField(
             func=lambda x, y: 100 * x * y,
             xlim=(0, 1),
             ylim=(0, 1),
@@ -114,20 +114,20 @@ def demo_datafield():
         fill=True,
     )
 
-def demo_datafill():
+def demo_symfill():
     decay = lambda x: C.exp(-0.1*x) * C.sin(x)
     return G.Graph(
-        G.DataFill(fy1=decay, fy2=0, fill=C.blue, fill_opacity=0.5, N=250),
-        G.DataPath(fy=decay, N=250),
+        G.SymFill(fy1=decay, fy2=0, fill=C.blue, fill_opacity=0.5, N=250),
+        G.SymLine(fy=decay, N=250),
         xlim=(0, 6*C.pi),
         ylim=(-1, 1),
         aspect=C.phi,
     )
 
-def demo_datapath():
+def demo_symline():
     return G.Plot(
-        G.DataPath(fy=C.sin, stroke=C.red, stroke_width=2),
-        G.DataPath(fy=lambda x: C.sin(x) + 0.2*C.sin(5*x), stroke=C.blue, stroke_width=2),
+        G.SymLine(fy=C.sin, stroke=C.red, stroke_width=2),
+        G.SymLine(fy=lambda x: C.sin(x) + 0.2*C.sin(5*x), stroke=C.blue, stroke_width=2),
         xlim=(0, 2*C.pi),
         ylim=(-1.5, 1.5),
         aspect=C.phi,
@@ -135,10 +135,10 @@ def demo_datapath():
         grid=True,
     )
 
-def demo_datapoints():
+def demo_sympoints():
     return G.Plot(
-        G.DataPath(fy=C.sin, stroke=C.blue, stroke_width=2),
-        G.DataPoints(
+        G.SymLine(fy=C.sin, stroke=C.blue, stroke_width=2),
+        G.SymPoints(
             lambda x, y: G.Rect(fill=C.white, rounded=0.3, aspect=2, spin=-C.r2d*C.atan(C.cos(x))),
             fy=C.sin,
             size=0.125,
@@ -152,14 +152,14 @@ def demo_datapoints():
         margin=[0.25, 0.1],
     )
 
-def demo_datapoly():
+def demo_sympoly():
     freq, amp = 5, 0.25
     famp = lambda t: 1 + amp * C.sin(freq * t)
     fx = lambda t: famp(t) * C.cos(t)
     fy = lambda t: famp(t) * C.sin(t)
     return G.Frame(
         G.Graph(
-            G.DataPoly(fx=fx, fy=fy, tlim=(0, 2*C.pi), N=500, fill=C.blue, opacity=0.75),
+            G.SymPoly(fx=fx, fy=fy, tlim=(0, 2*C.pi), N=500, fill=C.blue, opacity=0.75),
             xlim=(-1.5, 1.5),
             ylim=(-1.5, 1.5),
         ),
@@ -184,7 +184,7 @@ def demo_ellipse():
 
 def demo_graph():
     return G.Graph(
-        G.DataPoints(
+        G.SymPoints(
             lambda x, y: G.Square(rounded=True, spin=C.r2d*x),
             fy=C.sin,
             xlim=(0, 2*C.pi),
@@ -238,7 +238,7 @@ def demo_line():
 def demo_math():
     return G.Frame(
         G.Plot(
-            G.DataPath(fy=lambda x: C.exp(C.sin(x))),
+            G.SymLine(fy=lambda x: C.exp(C.sin(x))),
             aspect=C.phi,
             xlim=(0, 2*C.pi),
             ylim=(0, 3),
@@ -272,7 +272,7 @@ def demo_node():
 def demo_plot():
     xticks = [(x*C.pi, f'{x:.2g} π') for x in linspace(0, 2, 6)[1:]]
     return G.Plot(
-        G.DataPath(fy=lambda x: -C.sin(x), xlim=(0, 2*C.pi)),
+        G.SymLine(fy=lambda x: -C.sin(x), xlim=(0, 2*C.pi)),
         aspect=C.phi,
         xanchor=0,
         xticks=xticks,
@@ -290,7 +290,7 @@ def demo_points():
         G.Points([(0, 0.5), (0.5, 0), (-0.5, 0), (0, -0.5)], size=0.02),
         G.Rect(pos=(0.5, 0.5), rad=0.1),
         G.Circle(pos=(-0.5, -0.5), rad=0.1),
-        *[G.DataPath(fy=lambda x: C.sin(a*x)) for a in [0.5, 0.9, 1.5]],
+        *[G.SymLine(fy=lambda x: C.sin(a*x)) for a in [0.5, 0.9, 1.5]],
         xlim=(-1, 1),
         ylim=(-1, 1),
         margin=0.3,
@@ -312,7 +312,7 @@ def demo_slide():
     return G.Slide(
         G.Text('Here\'s a plot of a sine wave below. It has to be the right size to fit in with the figure correctly.'),
         G.Plot(
-            G.DataPath(fy=C.sin, stroke=C.blue, stroke_width=2),
+            G.SymLine(fy=C.sin, stroke=C.blue, stroke_width=2),
             xlim=(0, 2*C.pi),
             ylim=(-1.5, 1.5),
             fill=True,
@@ -376,11 +376,11 @@ DEMOS = {
     'axis': demo_axis,
     'barplot': demo_barplot,
     'colors': demo_colors,
-    'datafield': demo_datafield,
-    'datafill': demo_datafill,
-    'datapath': demo_datapath,
-    'datapoints': demo_datapoints,
-    'datapoly': demo_datapoly,
+    'symfield': demo_symfield,
+    'symfill': demo_symfill,
+    'symline': demo_symline,
+    'sympoints': demo_sympoints,
+    'sympoly': demo_sympoly,
     'edge': demo_edge,
     'ellipse': demo_ellipse,
     'graph': demo_graph,

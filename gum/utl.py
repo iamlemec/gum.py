@@ -4,7 +4,7 @@ import json
 import inspect
 from collections import defaultdict
 
-from .gum import evaluate, display
+from .gum import evaluate, display, snake_case
 
 ##
 ## mixins
@@ -238,7 +238,7 @@ def stringify(value):
 
 def convert_args(opts):
     return ' '.join([
-        f'{k}={{{stringify(v)}}}' for k, v in opts.items()
+        f'{snake_case(k)}={{{stringify(v)}}}' for k, v in opts.items()
     ])
 
 def convert_child(value):
