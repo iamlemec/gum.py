@@ -236,17 +236,25 @@ def stringify(value):
     else:
         raise ValueError(f'Unsupported type: {type(value)}')
 
+def convert_argval(v):
+    if isinstance(v, str):
+        return f'"{v}"'
+    else:
+        return f'{{{stringify(v)}}}'
+
 def convert_args(opts):
     return ' '.join([
-        f'{snake_case(k)}={{{stringify(v)}}}' for k, v in opts.items()
+        f'{snake_case(k)}={convert_argval(v)}' for k, v in opts.items()
     ])
 
 def convert_child(value):
     enc = stringify(value)
     if isinstance(value, Element):
         return enc
+    elif isinstance(value, str):
+        return value
     else:
-        return f'{{ {enc} }}'
+        return f'{{{enc}}}'
 
 def indented(text, n=2):
     tab = n * ' '
