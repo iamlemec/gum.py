@@ -189,17 +189,14 @@ class BarPlot(Group):
 
 ## network elements
 
-
-class TextNode(Group):
-    def __init__(self, *children, **kwargs):
-        super().__init__(*children, tag='TextNode', **kwargs)
-
 class Node(Group):
     def __init__(self, *children, **kwargs):
         super().__init__(*children, tag='Node', **kwargs)
 
 class Edge(Element):
     def __init__(self, **kwargs):
+        if 'from_' in kwargs:
+            kwargs['from'] = kwargs.pop('from_')
         super().__init__('Edge', True, **kwargs)
 
 class Network(Group):

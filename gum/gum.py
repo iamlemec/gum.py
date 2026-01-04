@@ -155,6 +155,7 @@ def display(code, size='80x25', theme='dark', format='svg', method=None, **kwarg
         raise ValueError(f'Invalid format: {format}')
 
     # display on terminal
+    print() # make it on a new line
     chafa(data, size=size, format=method)
 
 def display_file(path, **kwargs):

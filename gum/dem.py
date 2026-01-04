@@ -169,9 +169,9 @@ def demo_sympoly():
 
 def demo_edge():
     return G.Network(
-        G.TextNode('Hello', label='hello', pos=(0.25, 0.25)),
-        G.TextNode('World!', label='world', pos=(0.75, 0.75)),
-        G.Edge(node1='hello', node2='world', arrow1_fill=C.red, arrow2_fill=C.blue),
+        G.Node('Hello', id='hello', pos=(0.25, 0.25)),
+        G.Node('World!', id='world', pos=(0.75, 0.75)),
+        G.Edge(from_='hello', to='world', arrow_from_fill=C.red, arrow_to_fill=C.blue),
         # node_fill=C.gray,
         edge_arrow=True,
     )
@@ -249,11 +249,11 @@ def demo_math():
 
 def demo_network():
     return G.Network(
-        G.TextNode('Hello world', label='hello', pos=(0.25, 0.5), wrap=3),
-        G.TextNode('This is a test of wrapping capabilities', label='test', pos=(0.75, 0.25), wrap=6),
-        G.Node(G.Ellipse(aspect=1.5, fill=C.blue), label='ball', pos=(0.75, 0.75)),
-        G.Edge(node1='hello', node2='test'),
-        G.Edge(node1='hello', node2='ball', dir1='s', curve=3),
+        G.Node('Hello world', id='hello', pos=(0.25, 0.5), wrap=3),
+        G.Node('This is a test of wrapping capabilities', id='test', pos=(0.75, 0.25), wrap=6),
+        G.Node(G.Ellipse(aspect=1.5, fill=C.blue), id='ball', pos=(0.75, 0.75)),
+        G.Edge(from_='hello', to='test'),
+        G.Edge(from_='hello', to='ball', dir1='s', curve=3),
         aspect=1.5,
         node_yrad=0.15,
         node_rounded=True,
@@ -263,9 +263,9 @@ def demo_network():
 
 def demo_node():
     return G.Network(
-        G.TextNode('Hello', label='hello', pos=(0.25, 0.25)),
-        G.TextNode('World!', label='world', pos=(0.75, 0.75)),
-        G.Edge(node1='hello', node2='world'),
+        G.Node('Hello', id='hello', pos=(0.25, 0.25)),
+        G.Node('World!', id='world', pos=(0.75, 0.75)),
+        G.Edge(from_='hello', to='world'),
         # node_fill=C.gray,
     )
 
