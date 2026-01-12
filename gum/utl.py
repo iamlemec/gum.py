@@ -183,6 +183,15 @@ class Element(DisplayMixin):
             inner = self.inner()
             return f'<{self.tag} {args}>\n{inner}\n</{self.tag}>'
 
+class Group(Element):
+    def __init__(self, *children, tag='Group', **args):
+        unary = len(children) == 0
+        super().__init__(tag, unary, **args)
+        self.children = children
+
+    def inner(self):
+        return '\n'.join([ indented(convert_child(c)) for c in self.children ])
+
 class DataGroup(Element):
     def __init__(self, *children, tag='Group', **args):
         unary = len(children) == 0
@@ -192,14 +201,13 @@ class DataGroup(Element):
     def inner(self):
         return convert_child(self.children)
 
-class Group(Element):
+class RawGroup(Element):
     def __init__(self, *children, tag='Group', **args):
-        unary = len(children) == 0
-        super().__init__(tag, unary, **args)
+        super().__init__(tag, False, **args)
         self.children = children
 
     def inner(self):
-        return '\n'.join([ indented(convert_child(c)) for c in self.children ])
+        return '\n'.join([ indented(convert_child(c, raw=True)) for c in self.children ])
 
 ##
 ## converters
@@ -247,11 +255,11 @@ def convert_args(opts):
         f'{snake_case(k)}={convert_argval(v)}' for k, v in opts.items()
     ])
 
-def convert_child(value):
+def convert_child(value, raw=False):
     enc = stringify(value)
     if isinstance(value, Element):
         return enc
-    elif isinstance(value, str):
+    elif not raw and isinstance(value, str):
         return value
     else:
         return f'{{{enc}}}'

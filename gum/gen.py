@@ -1,6 +1,6 @@
 # gum generation
 
-from .utl import Var, Con, Element, DisplayMixin, DataGroup, Group
+from .utl import Var, Con, Element, Group, DataGroup, RawGroup, DisplayMixin
 
 ##
 ## gum constructors
@@ -58,8 +58,8 @@ class Grid(Group):
         super().__init__(*children, tag='Grid', **args)
 
 class Points(DataGroup):
-    def __init__(self, **kwargs):
-        super().__init__('Points', True, **kwargs)
+    def __init__(self, *children, **kwargs):
+        super().__init__(*children, tag='Points', **kwargs)
 
 ## shape elements
 
@@ -72,12 +72,16 @@ class Ellipse(Element):
         super().__init__('Ellipse', True, **kwargs)
 
 class Line(DataGroup):
-    def __init__(self, **kwargs):
-        super().__init__('Line', True, **kwargs)
+    def __init__(self, *children, **kwargs):
+        super().__init__(*children, tag='Line', **kwargs)
 
 class Shape(DataGroup):
-    def __init__(self, **kwargs):
-        super().__init__('Shape', True, **kwargs)
+    def __init__(self, *children, **kwargs):
+        super().__init__(*children, tag='Shape', **kwargs)
+
+class Spline(DataGroup):
+    def __init__(self, *children, **kwargs):
+        super().__init__(*children, tag='Spline', **kwargs)
 
 class Square(Element):
     def __init__(self, **kwargs):
@@ -105,11 +109,11 @@ class TextFrame(Group):
     def __init__(self, *children, **kwargs):
         super().__init__(*children, tag='TextFrame', **kwargs)
 
-class Latex(Group):
+class Latex(RawGroup):
     def __init__(self, *children, **kwargs):
         super().__init__(*children, tag='Latex', **kwargs)
 
-class Equation(Group):
+class Equation(RawGroup):
     def __init__(self, *children, **kwargs):
         super().__init__(*children, tag='Equation', **kwargs)
 
