@@ -57,7 +57,7 @@ class Grid(Group):
     def __init__(self, *children, **args):
         super().__init__(*children, tag='Grid', **args)
 
-class Points(Element):
+class Points(DataGroup):
     def __init__(self, **kwargs):
         super().__init__('Points', True, **kwargs)
 
@@ -71,6 +71,14 @@ class Ellipse(Element):
     def __init__(self, **kwargs):
         super().__init__('Ellipse', True, **kwargs)
 
+class Line(DataGroup):
+    def __init__(self, **kwargs):
+        super().__init__('Line', True, **kwargs)
+
+class Shape(DataGroup):
+    def __init__(self, **kwargs):
+        super().__init__('Shape', True, **kwargs)
+
 class Square(Element):
     def __init__(self, **kwargs):
         super().__init__('Square', True, **kwargs)
@@ -79,12 +87,6 @@ class Circle(Element):
     def __init__(self, **kwargs):
         super().__init__('Circle', True, **kwargs)
 
-## draw elements
-
-class Line(Element):
-    def __init__(self, **kwargs):
-        super().__init__('Line', True, **kwargs)
-
 class HLine(Element):
     def __init__(self, **kwargs):
         super().__init__('HLine', True, **kwargs)
@@ -92,22 +94,6 @@ class HLine(Element):
 class VLine(Element):
     def __init__(self, **kwargs):
         super().__init__('VLine', True, **kwargs)
-
-class Polyline(DataGroup):
-    def __init__(self, *children, **kwargs):
-        super().__init__(*children, tag='Polyline', **kwargs)
-
-class Polygon(DataGroup):
-    def __init__(self, *children, **kwargs):
-        super().__init__(*children, tag='Polygon', **kwargs)
-
-class Points(DataGroup):
-    def __init__(self, *children, **kwargs):
-        super().__init__(*children, tag='Points', **kwargs)
-
-class Arrow(Element):
-    def __init__(self, **kwargs):
-        super().__init__('Arrow', True, **kwargs)
 
 ## text elements
 
@@ -118,6 +104,10 @@ class Text(Group):
 class TextFrame(Group):
     def __init__(self, *children, **kwargs):
         super().__init__(*children, tag='TextFrame', **kwargs)
+
+class Latex(Group):
+    def __init__(self, *children, **kwargs):
+        super().__init__(*children, tag='Latex', **kwargs)
 
 class Equation(Group):
     def __init__(self, *children, **kwargs):
@@ -133,17 +123,21 @@ class SymLine(Element):
     def __init__(self, *children, **kwargs):
         super().__init__('SymLine', True, **kwargs)
 
-class SymField(Element):
+class SymShape(Element):
     def __init__(self, **kwargs):
-        super().__init__('SymField', True, **kwargs)
+        super().__init__('SymShape', True, **kwargs)
+
+class SymSpline(Element):
+    def __init__(self, **kwargs):
+        super().__init__('SymSpline', True, **kwargs)
 
 class SymFill(Element):
     def __init__(self, **kwargs):
         super().__init__('SymFill', True, **kwargs)
 
-class SymPoly(Element):
+class SymField(Element):
     def __init__(self, **kwargs):
-        super().__init__('SymPoly', True, **kwargs)
+        super().__init__('SymField', True, **kwargs)
 
 ## graph elements
 
@@ -188,6 +182,18 @@ class BarPlot(Group):
         super().__init__(*children, tag='BarPlot', **args)
 
 ## network elements
+
+class ArrowHead(Element):
+    def __init__(self, **kwargs):
+        super().__init__('ArrowHead', True, **kwargs)
+
+class Arrow(Element):
+    def __init__(self, **kwargs):
+        super().__init__('Arrow', True, **kwargs)
+
+class ArrowSpline(Element):
+    def __init__(self, **kwargs):
+        super().__init__('ArrowSpline', True, **kwargs)
 
 class Node(Group):
     def __init__(self, *children, **kwargs):
