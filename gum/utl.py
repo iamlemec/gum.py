@@ -164,6 +164,7 @@ class DisplayMixin:
             svg = evaluate(self)
             display_svg(svg, raw=True)
         else:
+            print() # make it on a new line
             display(self)
 
 class Element(DisplayMixin):

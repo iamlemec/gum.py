@@ -11,7 +11,7 @@ from .utl import prefix_split
 
 DEFAULT_BASE = {
     'aspect': 2,
-    'margin': 0.1,
+    'margin': 0.15,
 }
 
 DEFAULT_PLOT = {
