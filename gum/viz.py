@@ -2,7 +2,7 @@
 
 from itertools import cycle
 
-from .gen import C, GumData, Gum, SymLine, SymPoints, Plot, BarPlot, VBar
+from .gen import C, GumData, Gum, SymPoints, SymLine, SymSpline, Plot, BarPlot, VBar
 from .utl import prefix_split
 
 ##
@@ -78,7 +78,7 @@ def ensure_frame(data):
         raise ValueError(f'Unsupported type: {type(data)}')
     return data
 
-def lines(frame, **kwargs):
+def lines(frame, spline=False, **kwargs):
     # collect arguments
     args = { **DEFAULT_PLOT, **kwargs }
     line_args, plot_args = prefix_split('line', args)
@@ -87,9 +87,12 @@ def lines(frame, **kwargs):
     frame = ensure_frame(frame)
     data = GumData.from_frame(frame)
 
+    # get maker class
+    Maker = SymSpline if spline else SymLine
+
     # data plotters
     lines = [
-        SymLine(xvals=data.index, yvals=v, **{'stroke': c, **line_args})
+        Maker(xvals=data.index, yvals=v, **{'stroke': c, **line_args})
         for v, c in zip(data, cycle(COLORS))
     ]
 

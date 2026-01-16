@@ -1,8 +1,6 @@
 # element demos
 
-import sys
 from .gen import C, V
-from .gum import display
 from . import gen as G
 
 ##
@@ -94,8 +92,9 @@ def demo_points():
         *[G.SymLine(fy=siner(a)) for a in (0.5, 0.9, 1.5)],
         xlim=(-1, 1),
         ylim=(-1, 1),
-        margin=0.3,
         grid=True,
+        margin=0.3,
+        aspect=1,
         xlabel='time (seconds)',
         ylabel='space (meters)',
         title='Spacetime Vibes',
@@ -188,6 +187,7 @@ def demo_slide():
             fill=True,
             grid=True,
             margin=(0.25, 0.05),
+            aspect=2,
         ),
         G.Text('It ranges from low to high and has some extra vertical space to allow us to see the full curve.'),
         title='The Art of the Sine Wave',
@@ -202,9 +202,10 @@ def demo_sympoints():
         G.SymPoints(fy=C.sin, size=0.125, shape=pill, N=11),
         xlim=(0, 2*C.pi),
         ylim=(-1.5, 1.5),
-        fill=True,
+        fill=GRAY,
         grid=True,
-        margin=[0.25, 0.1],
+        margin=0.25,
+        aspect='auto',
     )
 
 def demo_symline():
@@ -222,9 +223,14 @@ def demo_symshape():
     rad = lambda t: 1 - 0.3 * C.cos(2.5 * t)**2
     fx = lambda t: rad(t) * C.sin(t)
     fy = lambda t: rad(t) * C.cos(t)
-    return G.SymShape(
-        fx=fx, fy=fy, tlim=(0, 2*C.pi),
-        N=200, aspect=1, fill=C.blue
+    return G.Frame(
+        G.SymShape(
+            fx=fx, fy=fy, tlim=(0, 2*C.pi),
+            N=200, aspect=1, fill=C.blue
+        ),
+        rounded=True,
+        padding=True,
+        margin=True,
     )
 
 def demo_symspline():
@@ -256,7 +262,9 @@ def demo_graph():
     square = lambda x, y: G.Square(rounded=True, spin=C.r2d*x)
     return G.Graph(
         G.SymPoints(fy=C.sin, xlim=(0, 2*C.pi), size=0.5, shape=square, N=150),
-        padding=(0.2, 0.6),
+        ylim=(-1.5, 1.5),
+        padding=0.2,
+        aspect=2,
     )
 
 def demo_plot():

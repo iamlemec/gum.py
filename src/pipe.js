@@ -3,45 +3,21 @@
 import readline from 'readline'
 import { stdout } from 'process'
 
-import { ErrorNoCode, ErrorParse, ErrorNoReturn, ErrorNoElement, ErrorGenerate, ErrorRender } from 'gum/types'
+import { ErrorNoCode, ErrorNoReturn, ErrorNoElement } from 'gum/error'
 import { evaluateGum } from 'gum/eval'
 import { renderPng } from 'gum/render'
 
 const handlers = {
     evaluate: async (code, { size, theme }) => {
-        let elem, svg
-        try {
-            elem = evaluateGum(code, { size: size, theme })
-        } catch (e) {
-            throw new ErrorParse(e.message)
-        }
-        try {
-            svg = elem.svg()
-        } catch (e) {
-            throw new ErrorGenerate(e.message)
-        }
-        return svg
+        const elem = evaluateGum(code, { size: size, theme })
+        return elem.svg()
     },
     render: async (code, { size: size0, theme, background }) => {
-        let elem, svg, png
-        try {
-            elem = evaluateGum(code, { size: size0, theme })
-        } catch (e) {
-            throw new ErrorParse(e.message)
-        }
-        try {
-            svg = elem.svg()
-        } catch (e) {
-            throw new ErrorGenerate(e.message)
-        }
-        try {
-            const { size } = elem
-            const png0 = await renderPng(svg, { size, background })
-            png = png0.toString('base64')
-        } catch (e) {
-            throw new ErrorRender(e.message)
-        }
-        return png
+        const elem = evaluateGum(code, { size: size0, theme })
+        const svg = elem.svg()
+        const { size } = elem
+        const png0 = await renderPng(svg, { size, background })
+        return png0.toString('base64')
     },
 }
 
@@ -49,18 +25,12 @@ function parseError(e) {
     const { message } = e
     if (e instanceof ErrorNoCode) {
         return { error: 'NOCODE', message }
-    } else if (e instanceof ErrorParse) {
-        return { error: 'PARSE', message }
     } else if (e instanceof ErrorNoReturn) {
         return { error: 'NORETURN', message }
     } else if (e instanceof ErrorNoElement) {
         return { error: 'NOELEMENT', message }
-    } else if (e instanceof ErrorGenerate) {
-        return { error: 'GENERATE', message }
-    } else if (e instanceof ErrorRender) {
-        return { error: 'RENDER', message }
     }
-    return { error: 'UNKNOWN', message }
+    return { error: 'PARSE', message }
 }
 
 // create readline interface
