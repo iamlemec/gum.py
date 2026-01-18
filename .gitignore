@@ -2,6 +2,6 @@ __pycache__
 .ipynb_checkpoints
 dist
 gum.egg-info
-gum/gum.js
+gum/gum-jsx
 package-lock.json
 node_modules

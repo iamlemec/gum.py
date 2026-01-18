@@ -10,7 +10,7 @@
 
 A Python wrapper for [gum.js](https://github.com/CompendiumLabs/gum.js), a language for creating visualizations using a React-like JSX dialect that evaluates to SVG. Designed for general graphics, plots, graphs, and network diagrams.
 
-Head to **[compendiumlabs.ai/gum](https://compendiumlabs.ai/gum)** for a live demo and documentation on the underlying gum.js library.
+Head to **[compendiumlabs.ai/gum](https://compendiumlabs.ai/gum)** for a live demo and documentation on the underlying gum.js library. Or see the [gum.js](https://github.com/CompendiumLabs/gum.js) repository.
 
 # Installation
 
@@ -135,4 +135,4 @@ gum.py wraps all gum.js components. Key ones include:
 
 **Network**: `Node`, `Edge`, `Network`, `Arrow`
 
-See the [gum.js documentation](https://compendiumlabs.ai/gum) for detailed component reference.
+See the [gum.js documentation](https://compendiumlabs.ai/gum/docs) for detailed component reference.

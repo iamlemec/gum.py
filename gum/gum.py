@@ -33,13 +33,10 @@ def chafa(data, **kwargs):
 ##
 
 class GumErrorType:
-    UNKNOWN = 'UNKNOWN'
+    PARSE = 'PARSE'
     NOCODE = 'NOCODE'
     NORETURN = 'NORETURN'
     NOELEMENT = 'NOELEMENT'
-    PARSE = 'PARSE'
-    GENERATE = 'GENERATE'
-    RENDER = 'RENDER'
 
 class GumError(Exception):
     def __init__(self, error_type, error_message):
@@ -52,7 +49,7 @@ class GumError(Exception):
 ##
 
 LIB_PATH = os.path.dirname(__file__)
-GUM_PATH = os.path.join(LIB_PATH, 'gum.js/gum.js')
+GUM_PATH = os.path.join(LIB_PATH, 'gum-jsx/gum.js')
 
 class GumUnixPipe:
     def __init__(self):
@@ -123,11 +120,7 @@ class GumUnixPipe:
         self.init()
 
     def evaluate(self, code, pixels=None, **kwargs):
-        return self.post(task='evaluate', code=code, size=pixels, **kwargs)
-
-    def render(self, code, pixels=None, **kwargs):
-        data = self.post(task='render', code=code, size=pixels, **kwargs)
-        return base64.b64decode(data)
+        return self.post(code=code, size=pixels, **kwargs)
 
 ##
 ## server instance
@@ -139,23 +132,12 @@ server = GumUnixPipe()
 def restart():
     server.restart()
 
-def evaluate(code, **kwargs):
-    return server.evaluate(str(code), **kwargs)
+def evaluate(code, pixels=500, **kwargs):
+    return server.evaluate(str(code), pixels=pixels, **kwargs)
 
-def render(code, **kwargs):
-    return server.render(str(code), **kwargs)
-
-def display(code, size='80x25', theme='dark', format='svg', method=None, **kwargs):
-    # evaluate or render
-    if format == 'svg':
-        data = evaluate(str(code), theme=theme, **kwargs).encode()
-    elif format == 'png':
-        data = render(str(code), theme=theme, **kwargs)
-    else:
-        raise ValueError(f'Invalid format: {format}')
-
-    # display on terminal
-    chafa(data, size=size, format=method)
+def display(code, size='80x25', theme='dark', format=None, **kwargs):
+    data = evaluate(str(code), theme=theme, **kwargs).encode()
+    chafa(data, size=size, format=format)
 
 def display_file(path, **kwargs):
     code = readtext(path)

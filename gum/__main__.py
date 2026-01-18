@@ -14,10 +14,5 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # dispatch commands
-    if args.demo is not None:
-        elem = demo(args.demo)
-        display(elem, size=args.size, theme=args.theme)
-    else:
-        # read code from stdin
-        code = sys.stdin.read()
-        display(code, size=args.size, theme=args.theme)
+    elem = demo(args.demo) if args.demo is not None else sys.stdin.read()
+    display(elem, size=args.size, theme=args.theme)
