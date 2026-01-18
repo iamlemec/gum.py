@@ -15,7 +15,7 @@ Head to **[compendiumlabs.ai/gum](https://compendiumlabs.ai/gum)** for a live de
 # Installation
 
 ```bash
-pip install gum
+pip install gum-py
 ```
 
 Requires Node.js to be installed for the gum.js backend.

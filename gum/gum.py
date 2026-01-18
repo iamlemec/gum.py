@@ -54,6 +54,7 @@ GUM_PATH = os.path.join(LIB_PATH, 'gum-jsx/gum.js')
 class GumUnixPipe:
     def __init__(self):
         self.proc = None
+        self.debug = False
         self._pump_thread = None
         self.init()
 
@@ -76,7 +77,8 @@ class GumUnixPipe:
     def _start_pump_loop(self):
         def pump_loop():
             for line in self.proc.stderr:
-                print(f'[gum server] {line}')
+                if self.debug:
+                    print(f'[gum server] {line}')
         self._pump_thread = threading.Thread(target=pump_loop, daemon=True)
         self._pump_thread.start()
 
@@ -131,6 +133,9 @@ server = GumUnixPipe()
 
 def restart():
     server.restart()
+
+def set_debug(debug=True):
+    server.debug = debug
 
 def evaluate(code, pixels=500, **kwargs):
     return server.evaluate(str(code), pixels=pixels, **kwargs)
